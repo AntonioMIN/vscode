@@ -52,6 +52,7 @@ import { Schemas } from 'vs/base/common/network';
 import { EditorActivation, EditorOpenContext } from 'vs/platform/editor/common/editor';
 import { IDialogService, IFileDialogService, ConfirmResult } from 'vs/platform/dialogs/common/dialogs';
 import { ILogService } from 'vs/platform/log/common/log';
+import { UntitledTextEditorInput } from 'vs/workbench/services/untitled/common/untitledTextEditorInput';
 
 export class EditorGroupView extends Themable implements IEditorGroupView {
 
@@ -256,7 +257,11 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
 			if (this.isEmpty) {
 				EventHelper.stop(e);
 
-				this.openEditor(this.textFileService.untitled.create(), EditorOptions.create({ pinned: true }));
+				this.openEditor(this.instantiationService.createInstance(
+					UntitledTextEditorInput,
+					this.textFileService.untitled.create()),
+					EditorOptions.create({ pinned: true })
+				);
 			}
 		}));
 

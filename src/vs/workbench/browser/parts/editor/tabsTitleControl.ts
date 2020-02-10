@@ -43,6 +43,7 @@ import { withNullAsUndefined, assertAllDefined, assertIsDefined } from 'vs/base/
 import { ILabelService } from 'vs/platform/label/common/label';
 import { ITextFileService } from 'vs/workbench/services/textfile/common/textfiles';
 import { basenameOrAuthority } from 'vs/base/common/resources';
+import { UntitledTextEditorInput } from 'vs/workbench/services/untitled/common/untitledTextEditorInput';
 
 interface IEditorInputLabel {
 	name?: string;
@@ -193,7 +194,11 @@ export class TabsTitleControl extends TitleControl {
 
 				EventHelper.stop(e);
 
-				this.group.openEditor(this.textFileService.untitled.create(), { pinned: true /* untitled is always pinned */, index: this.group.count /* always at the end */ });
+				this.group.openEditor(this.instantiationService.createInstance(
+					UntitledTextEditorInput,
+					this.textFileService.untitled.create()),
+					{ pinned: true /* untitled is always pinned */, index: this.group.count /* always at the end */ }
+				);
 			}));
 		});
 

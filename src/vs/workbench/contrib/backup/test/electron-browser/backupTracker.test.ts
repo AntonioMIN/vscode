@@ -43,6 +43,8 @@ import { BackupTracker } from 'vs/workbench/contrib/backup/common/backupTracker'
 import { ModelServiceImpl } from 'vs/editor/common/services/modelServiceImpl';
 import { IModelService } from 'vs/editor/common/services/modelService';
 import { TestTextFileService, TestElectronService, workbenchInstantiationService } from 'vs/workbench/test/electron-browser/workbenchTestServices';
+import { IInstantiationService } from 'vs/platform/instantiation/common/instantiation';
+import { UntitledTextEditorInput } from 'vs/workbench/services/untitled/common/untitledTextEditorInput';
 
 const userdataDir = getRandomTestPath(os.tmpdir(), 'vsctests', 'backuprestorer');
 const backupHome = path.join(userdataDir, 'Backups');
@@ -133,7 +135,7 @@ suite('BackupTracker', () => {
 		return pfs.rimraf(backupHome, pfs.RimRafMode.MOVE);
 	});
 
-	async function createTracker(): Promise<[ServiceAccessor, EditorPart, BackupTracker]> {
+	async function createTracker(): Promise<[ServiceAccessor, EditorPart, BackupTracker, IInstantiationService]> {
 		const backupFileService = new NodeTestBackupFileService(workspaceBackupPath);
 		const instantiationService = workbenchInstantiationService();
 		instantiationService.stub(IBackupFileService, backupFileService);
@@ -153,13 +155,13 @@ suite('BackupTracker', () => {
 
 		const tracker = instantiationService.createInstance(TestBackupTracker);
 
-		return [accessor, part, tracker];
+		return [accessor, part, tracker, instantiationService];
 	}
 
 	async function untitledBackupTest(options?: INewUntitledTextEditorOptions): Promise<void> {
-		const [accessor, part, tracker] = await createTracker();
+		const [accessor, part, tracker, instantiationService] = await createTracker();
 
-		const untitledEditor = accessor.textFileService.untitled.create(options);
+		const untitledEditor = instantiationService.createInstance(UntitledTextEditorInput, accessor.textFileService.untitled.create(options));
 		await accessor.editorService.openEditor(untitledEditor, { pinned: true });
 
 		const untitledModel = await untitledEditor.resolve();

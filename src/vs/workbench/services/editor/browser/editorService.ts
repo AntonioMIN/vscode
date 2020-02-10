@@ -28,6 +28,8 @@ import { registerSingleton } from 'vs/platform/instantiation/common/extensions';
 import { withNullAsUndefined } from 'vs/base/common/types';
 import { EditorsObserver } from 'vs/workbench/browser/parts/editor/editorsObserver';
 import { IEditorViewState } from 'vs/editor/common/editorCommon';
+import { IUntitledTextEditorModel } from 'vs/workbench/services/untitled/common/untitledTextEditorModel';
+import { UntitledTextEditorInput } from 'vs/workbench/services/untitled/common/untitledTextEditorInput';
 
 type CachedEditorInput = ResourceEditorInput | IFileEditorInput;
 type OpenInEditorGroup = IEditorGroup | GroupIdentifier | SIDE_GROUP_TYPE | ACTIVE_GROUP_TYPE;
@@ -575,14 +577,17 @@ export class EditorService extends Disposable implements EditorServiceImpl {
 			};
 
 			// Untitled resource: use as hint for an existing untitled editor
+			let untitledModel: IUntitledTextEditorModel;
 			if (untitledInput.resource?.scheme === Schemas.untitled) {
-				return this.untitledTextEditorService.create({ untitledResource: untitledInput.resource, ...untitledOptions });
+				untitledModel = this.untitledTextEditorService.create({ untitledResource: untitledInput.resource, ...untitledOptions });
 			}
 
 			// Other resource: use as hint for associated filepath
 			else {
-				return this.untitledTextEditorService.create({ associatedResource: untitledInput.resource, ...untitledOptions });
+				untitledModel = this.untitledTextEditorService.create({ associatedResource: untitledInput.resource, ...untitledOptions });
 			}
+
+			return this.instantiationService.createInstance(UntitledTextEditorInput, untitledModel);
 		}
 
 		// Resource Editor Support

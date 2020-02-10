@@ -23,6 +23,7 @@ import { VSBuffer } from 'vs/base/common/buffer';
 import { IFileDialogService } from 'vs/platform/dialogs/common/dialogs';
 import { URI } from 'vs/base/common/uri';
 import { joinPath } from 'vs/base/common/resources';
+import { UntitledTextEditorInput } from 'vs/workbench/services/untitled/common/untitledTextEditorInput';
 
 interface IDropOperation {
 	splitDirection?: GroupDirection;
@@ -309,13 +310,13 @@ class DropOverlay extends Themable {
 
 								// Open as untitled file with the provided contents
 								const contents = VSBuffer.wrap(new Uint8Array(event.target.result)).toString();
-								const untitledEditor = this.textFileService.untitled.create({ associatedResource: proposedFilePath, initialValue: contents });
+								const untitledModel = this.textFileService.untitled.create({ associatedResource: proposedFilePath, initialValue: contents });
 
 								if (!targetGroup) {
 									targetGroup = ensureTargetGroup();
 								}
 
-								await targetGroup.openEditor(untitledEditor);
+								await targetGroup.openEditor(this.instantiationService.createInstance(UntitledTextEditorInput, untitledModel));
 							}
 						};
 					}

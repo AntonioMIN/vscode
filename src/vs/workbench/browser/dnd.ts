@@ -240,7 +240,7 @@ export class ResourcesDropHandler {
 
 		// Untitled: always ensure that we open a new untitled for each file we drop
 		if (droppedDirtyEditor.resource.scheme === Schemas.untitled) {
-			droppedDirtyEditor.resource = this.textFileService.untitled.create({ mode: droppedDirtyEditor.mode, encoding: droppedDirtyEditor.encoding }).getResource();
+			droppedDirtyEditor.resource = this.textFileService.untitled.create({ mode: droppedDirtyEditor.mode, encoding: droppedDirtyEditor.encoding }).resource;
 		}
 
 		// File: ensure the file is not dirty or opened already

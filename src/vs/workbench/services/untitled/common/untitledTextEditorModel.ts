@@ -8,7 +8,7 @@ import { BaseTextEditorModel } from 'vs/workbench/common/editor/textEditorModel'
 import { URI } from 'vs/base/common/uri';
 import { IModeService } from 'vs/editor/common/services/modeService';
 import { IModelService } from 'vs/editor/common/services/modelService';
-import { Emitter } from 'vs/base/common/event';
+import { Event, Emitter } from 'vs/base/common/event';
 import { IBackupFileService } from 'vs/workbench/services/backup/common/backup';
 import { ITextResourceConfigurationService } from 'vs/editor/common/services/textResourceConfigurationService';
 import { ITextBufferFactory, ITextModel } from 'vs/editor/common/model';
@@ -24,9 +24,34 @@ import { ensureValidWordDefinition } from 'vs/editor/common/model/wordHelper';
 export interface IUntitledTextEditorModel extends ITextEditorModel, IModeSupport, IEncodingSupport, IWorkingCopy {
 
 	/**
+	 * Emits an event when the encoding of this untitled model changes.
+	 */
+	readonly onDidChangeEncoding: Event<void>;
+
+	/**
+	 * Emits an event when the name of this untitled model changes.
+	 */
+	readonly onDidChangeName: Event<void>;
+
+	/**
 	 * Wether this untitled text model has an associated file path.
 	 */
 	readonly hasAssociatedFilePath: boolean;
+
+	/**
+	 * Sets the encoding to use for this untitled model.
+	 */
+	setEncoding(encoding: string): void;
+
+	/**
+	 * Load the untitled model.
+	 */
+	load(): Promise<IUntitledTextEditorModel & IResolvedTextEditorModel>;
+
+	/**
+	 * Updates the value of the untitled model optionally allowing to ignore dirty.
+	 */
+	setValue(value: string, ignoreDirty?: boolean): void;
 }
 
 export class UntitledTextEditorModel extends BaseTextEditorModel implements IUntitledTextEditorModel {
@@ -67,10 +92,10 @@ export class UntitledTextEditorModel extends BaseTextEditorModel implements IUnt
 	private configuredEncoding: string | undefined;
 
 	constructor(
-		private readonly preferredMode: string | undefined,
 		public readonly resource: URI,
 		public readonly hasAssociatedFilePath: boolean,
 		private readonly initialValue: string | undefined,
+		private readonly preferredMode: string | undefined,
 		private preferredEncoding: string | undefined,
 		@IModeService modeService: IModeService,
 		@IModelService modelService: IModelService,
